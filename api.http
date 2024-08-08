@@ -2,7 +2,7 @@
 GET http://localhost:3000/wishlist
 
 ### Recuperar una película por id
-GET http://localhost:3000/wishlist/Celular
+GET http://localhost:3000/wishlist/2c6b50e7-55a9-11ef-995b-047c168336b8
 
 ### Recuperar todas las películas por un género
 GET http://localhost:3000/wishlist?min=400&max=600

@@ -1,24 +1,20 @@
-import { ProductModel } from "../models/products.js";
+import { ProductModel } from "../models/sql/productModel.js";
 import { valideProduct, validePartialProduct } from "../schemas/product.js";
 
 export class ProductController {
   static async getAll(req, res) {
-    try {
-      const min = req.query.min;
-      const max = req.query.max;
-      const productos = await ProductModel.getAll({ min, max });
-      res.json(productos);
-    } catch {
-      res.status(400).json({ error: "error al obtener los datos" });
-    }
+    const min = req.query.min;
+    const max = req.query.max;
+    const productos = await ProductModel.getAll({ min: min, max: max });
+    res.json(productos);
   }
 
   static async getById(req, res) {
-    const productoTitle = req.params.producto;
-    const producto = await ProductModel.getById({
-      productTitle: productoTitle,
+    const id = req.params.id;
+    const product = await ProductModel.getById({
+      id: id,
     });
-    return res.json(producto);
+    return res.json(product);
   }
 
   static async create(req, res) {
@@ -53,5 +49,13 @@ export class ProductController {
       message: "el obejeto ah sido modificado",
       data: updateProduct,
     });
+  }
+
+  static async delete(req, res) {
+    const id = req.params.id;
+    const product = await ProductModel.delete({
+      id: id,
+    });
+    return res.json(product);
   }
 }

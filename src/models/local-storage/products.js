@@ -1,4 +1,4 @@
-import { readJSON } from "../utils/read.js";
+import { readJSON } from "../../utils/read.js";
 
 const wishlist = readJSON("./list.json");
 

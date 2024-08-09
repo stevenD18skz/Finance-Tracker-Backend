@@ -2,25 +2,25 @@ import zod from "zod";
 
 export const productSchema = zod.object({
   title: zod.string({
-    invalid_type_error: "movie title must be string",
-    required_error: "movie title is requiered",
+    invalid_type_error: "product title must be string",
+    required_error: "product title is requiered",
   }),
-  precio: zod
+  amount: zod
     .number({
-      invalid_type_error: "movie title must be string",
-      required_error: "movie title is requiered",
+      invalid_type_error: "product amount must be string",
+      required_error: "product amount is requiered",
     })
     .positive()
     .min(0)
     .max(9999),
-  descripcion: zod.string({
-    invalid_type_error: "movie title must be string",
-    required_error: "movie title is requiered",
+  note: zod.string({
+    invalid_type_error: "product note must be string",
+    required_error: "product note is requiered",
   }),
-  type: zod.array(
-    zod.enum(["Health", "Set up"], {
-      invalid_type_error: "movie title must be string",
-      required_error: "movie title is requiered",
+  tags: zod.array(
+    zod.enum(["Health", "Set up", "Electrónica", "Móvil"], {
+      invalid_type_error: "product type must be string",
+      required_error: "product type is requiered",
     })
   ),
 });

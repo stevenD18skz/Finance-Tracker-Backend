@@ -29,7 +29,8 @@ export class ProductController {
       });
     }
 
-    const newProduct = await this.productModel.create({ input: result });
+    const newProduct = await this.productModel.create({ input: result.data });
+
     return res.json({
       message: "el obejeto ah sido agregado",
       data: newProduct,

@@ -21,21 +21,28 @@ export class ProductController {
   };
 
   create = async (req, res) => {
-    const result = valideProduct(req.body);
+    try {
+      const result = valideProduct(req.body);
 
-    if (!result.success) {
-      return res.status(400).json({
-        message: "hubo un error",
-        error: JSON.parse(result.error),
+      if (!result.success) {
+        return res.status(400).json({
+          message: "the request is bad, plese chek it",
+          error: JSON.parse(result.error),
+        });
+      }
+
+      const newProduct = await this.productModel.create({ input: result.data });
+
+      return res.json({
+        message: "El objeto ha sido agregado",
+        data: newProduct,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Error al crear el producto",
+        error: error.message,
       });
     }
-
-    const newProduct = await this.productModel.create({ input: result.data });
-
-    return res.json({
-      message: "el obejeto ah sido agregado",
-      data: newProduct,
-    });
   };
 
   update = async (req, res) => {
@@ -60,9 +67,11 @@ export class ProductController {
 
   delete = async (req, res) => {
     const id = req.params.id;
+
     const product = await this.productModel.delete({
       id: id,
     });
+
     return res.json(product);
   };
 }

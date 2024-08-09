@@ -7,7 +7,7 @@ export const productSchema = zod.object({
   }),
   amount: zod
     .number({
-      invalid_type_error: "product amount must be string",
+      invalid_type_error: "product amount must be int",
       required_error: "product amount is requiered",
     })
     .positive()
@@ -18,10 +18,20 @@ export const productSchema = zod.object({
     required_error: "product note is requiered",
   }),
   tags: zod.array(
-    zod.enum(["Health", "Set up", "Electrónica", "Móvil"], {
-      invalid_type_error: "product type must be string",
-      required_error: "product type is requiered",
-    })
+    zod.enum(
+      [
+        "Electrónica",
+        "Portátil",
+        "Móvil",
+        "Periférico",
+        "Accesorio",
+        "Pantalla",
+      ],
+      {
+        invalid_type_error: "product type must be string",
+        required_error: "product type is requiered",
+      }
+    )
   ),
 });
 

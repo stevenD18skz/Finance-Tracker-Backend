@@ -53,7 +53,6 @@ export class ProductModel {
 
     // Generar UUID
     const myUuid = uuidv4();
-    const idcryptp = crypto.randomUUID();
 
     try {
       // Iniciar transacción
@@ -84,15 +83,39 @@ export class ProductModel {
       // Confirmar transacción
       await connection.run("COMMIT");
 
-      return 2000;
+      const productAdd = await connection.get(
+        `SELECT 
+          p.id, 
+          p.title, 
+          p.amount, 
+          GROUP_CONCAT(t.name, ', ') AS tags,
+          p.note
+        FROM 
+          product p
+        LEFT JOIN 
+          product_tag pt ON p.id = pt.product_id
+        LEFT JOIN 
+          tag t ON pt.tag_id = t.id
+        WHERE 
+          p.id = ?
+        GROUP BY 
+          p.id`,
+        [myUuid]
+      );
+
+      const productsWithTagsArray = {
+        ...productAdd,
+        tags: productAdd.tags ? productAdd.tags.split(", ") : [],
+      };
+
+      return productsWithTagsArray;
     } catch (error) {
       // Revertir transacción en caso de error
-      await connection.run("ROLLBACK");
+      //await connection.run("ROLLBACK");
       console.error("Error creating product:", error);
-      throw new Error("Failed to create product");
+      throw new Error(error);
     }
   }
-
   static async update({ id, input }) {
     const { title, amount, note, tags } = input;
 
@@ -155,6 +178,6 @@ export class ProductModel {
     const result = await connection.run(`DELETE FROM product WHERE id = ?`, [
       id,
     ]);
-    return result.changes;
+    return result;
   }
 }

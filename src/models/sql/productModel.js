@@ -42,8 +42,6 @@ export class ProductModel {
       poster,
     } = input;
 
-    // todo: crear la conexión de genre
-
     // crypto.randomUUID()
     const [uuidResult] = await connection.query("SELECT UUID() uuid;");
     const [{ uuid }] = uuidResult;

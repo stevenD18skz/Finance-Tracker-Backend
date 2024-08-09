@@ -10,7 +10,7 @@ export const createApp = ({ productModel }) => {
   app.use(corsMiddlewares());
   app.disable("x-powered-by");
   app.use((req, res, next) => {
-    console.log(`${req.method} ${req.url}`);
+    console.log(`${req.method} ${req.url} ${req.body}`);
     next();
   });
 

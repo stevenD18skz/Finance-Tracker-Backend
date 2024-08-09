@@ -12,7 +12,7 @@ export const productSchema = zod.object({
     })
     .positive()
     .min(0)
-    .max(9999),
+    .max(999999),
   note: zod.string({
     invalid_type_error: "product note must be string",
     required_error: "product note is requiered",

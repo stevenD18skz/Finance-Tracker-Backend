@@ -23,8 +23,9 @@ export class ProductController {
   create = async (req, res) => {
     const result = valideProduct(req.body);
 
-    if (result.error) {
+    if (!result.success) {
       return res.status(400).json({
+        message: "hubo un error",
         error: JSON.parse(result.error),
       });
     }
@@ -41,12 +42,14 @@ export class ProductController {
     const result = validePartialProduct(req.body);
 
     if (!result.success) {
-      return res.status(404).json({ message: "no se encontro la pelicula" });
+      return res
+        .status(404)
+        .json({ message: "no se encontro la pelicula", error: result.error });
     }
 
-    const updateProduct = await this.productModel.patch({
-      input: result,
+    const updateProduct = await this.productModel.update({
       id: req.params.id,
+      input: result.data,
     });
 
     return res.json({

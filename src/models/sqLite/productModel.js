@@ -94,12 +94,61 @@ export class ProductModel {
   }
 
   static async update({ id, input }) {
-    const { title, amount, note } = input;
-    const result = await connection.run(
-      `UPDATE product SET title = ?, amount = ?, note = ? WHERE id = ?`,
-      [title, amount, note, id]
-    );
-    return result.changes;
+    const { title, amount, note, tags } = input;
+
+    // Verificar si los campos obligatorios están presentes
+    if (!title || !amount) {
+      throw new Error("Title and amount are required fields");
+    }
+
+    try {
+      // Iniciar transacción
+      await connection.run("BEGIN TRANSACTION");
+
+      // Actualizar el producto
+      const result = await connection.run(
+        `UPDATE product 
+         SET title = ?, amount = ?, note = ? 
+         WHERE id = ?`,
+        [title, amount, note, id]
+      );
+
+      // Si el producto no se actualizó, lanzar un error
+      if (result.changes === 0) {
+        throw new Error("Product not found or no changes made");
+      }
+
+      // Borrar las asociaciones actuales de tags para este producto
+      await connection.run(`DELETE FROM product_tag WHERE product_id = ?`, [
+        id,
+      ]);
+
+      // Insertar los nuevos tags asociados al producto
+      if (tags && tags.length > 0) {
+        const tagValues = tags
+          .map((tag) => `(?, (SELECT id FROM tag WHERE name = ?))`)
+          .join(", ");
+        const tagParams = tags.reduce(
+          (params, tag) => params.concat([id, tag]),
+          []
+        );
+
+        await connection.run(
+          `INSERT INTO product_tag (product_id, tag_id) VALUES ${tagValues}`,
+          tagParams
+        );
+      }
+
+      // Confirmar transacción
+      await connection.run("COMMIT");
+
+      return result.changes;
+    } catch (error) {
+      // Revertir transacción en caso de error
+      await connection.run("ROLLBACK");
+      console.error("Error updating product:", error);
+      throw new Error("Failed to update product");
+    }
   }
 
   static async delete({ id }) {

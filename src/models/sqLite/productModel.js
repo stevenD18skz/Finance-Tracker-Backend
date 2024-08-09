@@ -2,11 +2,16 @@ import connection from "../../config/database.js";
 
 export class ProductModel {
   static async getAll({ min, max }) {
+    const max_price = await connection.all(
+      `SELECT max(precio) as mx
+       FROM product`
+    );
+
     const products = await connection.all(
       `SELECT id, title, precio, note
        FROM product
        WHERE precio >= ? AND precio <= ?`,
-      [min || 0, max || 10000]
+      [min || 0, max || max_price[0].mx]
     );
     return products;
   }

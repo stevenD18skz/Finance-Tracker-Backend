@@ -1,6 +1,7 @@
 import connection from "../../config/database.js";
 import { v4 as uuidv4 } from "uuid";
 import crypto from "crypto";
+import e from "cors";
 
 export class ProductModel {
   static async getAll({ min, max }) {
@@ -39,13 +40,41 @@ export class ProductModel {
   }
 
   static async getById({ id }) {
-    const product = await connection.get(
-      `SELECT id, title, amount, note
-       FROM product
-       WHERE id = ?;`,
-      [id]
-    );
-    return product;
+    try {
+      const productAdd = await connection.get(
+        `SELECT 
+      p.id, 
+      p.title, 
+      p.amount, 
+      GROUP_CONCAT(t.name, ', ') AS tags,
+      p.note
+    FROM 
+      product p
+    LEFT JOIN 
+      product_tag pt ON p.id = pt.product_id
+    LEFT JOIN 
+      tag t ON pt.tag_id = t.id
+    WHERE 
+      p.id = ?
+    GROUP BY 
+      p.id`,
+        [id]
+      );
+
+      if (!productAdd) {
+        throw new Error("Product not found");
+      }
+
+      const productsWithTagsArray = {
+        ...productAdd,
+        tags: productAdd.tags ? productAdd.tags.split(", ") : [],
+      };
+
+      return productsWithTagsArray;
+    } catch (error) {
+      console.error("Error fetching product from database:", error);
+      throw new Error("Error retrieving product");
+    }
   }
 
   static async create({ input }) {

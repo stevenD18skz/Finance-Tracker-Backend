@@ -1,3 +1,4 @@
+import e from "cors";
 import { valideProduct, validePartialProduct } from "../schemas/product.js";
 
 export class ProductController {
@@ -13,11 +14,20 @@ export class ProductController {
   };
 
   getById = async (req, res) => {
-    const id = req.params.id;
-    const product = await this.productModel.getById({
-      id: id,
-    });
-    return res.json(product);
+    try {
+      const id = req.params.id;
+
+      const product = await this.productModel.getById({ id });
+
+      if (!product) {
+        return res.status(404).send({ error: "Product not found" });
+      }
+
+      return res.json(product);
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      return res.status(500).send({ error: "product not found" });
+    }
   };
 
   create = async (req, res) => {

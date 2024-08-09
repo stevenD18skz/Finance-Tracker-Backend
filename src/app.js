@@ -1,28 +1,29 @@
 import express from "express";
 import { corsMiddlewares } from "./middlewares/cors.js";
-import { productRouter } from "./Routes/productRouter.js";
+import { createMovieRouter } from "./Routes/productRouter.js";
+import { json } from "express";
 
-const app = express();
-const port = 3000;
-app.disable("x-powered-by");
+// después
+export const createApp = ({ productModel }) => {
+  const app = express();
+  app.use(json());
+  app.use(corsMiddlewares());
+  app.disable("x-powered-by");
+  app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+  });
 
-//MIDDLEWARES DE LA API
-app.use(corsMiddlewares());
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-});
-app.use(express.json()); //parser del body de json a objeto js
+  //RUTA PRINCIAPL
+  app.get("/", (req, res) => {
+    res.send("Hello World!");
+  });
 
-//RUTA PRINCIAPL
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+  app.use("/wishlist", createMovieRouter({ productModel: productModel }));
 
-//CONSUMIR EL ROUTER PARA "WISHLIST"
-app.use("/wishlist", productRouter);
+  const PORT = process.env.PORT ?? 3000;
 
-//COMENZAR LA API
-app.listen(port, () =>
-  console.log(`Example app listening on port https://${port}!`)
-);
+  app.listen(PORT, () => {
+    console.log(`server listening on port http://localhost:${PORT}`);
+  });
+};

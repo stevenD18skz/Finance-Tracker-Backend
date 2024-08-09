@@ -1,23 +1,26 @@
-import { ProductModel } from "../models/sql/productModel.js";
 import { valideProduct, validePartialProduct } from "../schemas/product.js";
 
 export class ProductController {
-  static async getAll(req, res) {
-    const min = req.query.min;
-    const max = req.query.max;
-    const productos = await ProductModel.getAll({ min: min, max: max });
-    res.json(productos);
+  constructor({ productModel }) {
+    this.productModel = productModel;
   }
 
-  static async getById(req, res) {
+  getAll = async (req, res) => {
+    const min = req.query.min;
+    const max = req.query.max;
+    const productos = await this.productModel.getAll({ min: min, max: max });
+    res.json(productos);
+  };
+
+  getById = async (req, res) => {
     const id = req.params.id;
-    const product = await ProductModel.getById({
+    const product = await this.productModel.getById({
       id: id,
     });
     return res.json(product);
-  }
+  };
 
-  static async create(req, res) {
+  create = async (req, res) => {
     const result = valideProduct(req.body);
 
     if (result.error) {
@@ -26,21 +29,21 @@ export class ProductController {
       });
     }
 
-    const newProduct = await ProductModel.create({ input: result });
+    const newProduct = await this.productModel.create({ input: result });
     return res.json({
       message: "el obejeto ah sido agregado",
       data: newProduct,
     });
-  }
+  };
 
-  static async update(req, res) {
+  update = async (req, res) => {
     const result = validePartialProduct(req.body);
 
     if (!result.success) {
       return res.status(404).json({ message: "no se encontro la pelicula" });
     }
 
-    const updateProduct = await ProductModel.patch({
+    const updateProduct = await this.productModel.patch({
       input: result,
       id: req.params.id,
     });
@@ -49,13 +52,13 @@ export class ProductController {
       message: "el obejeto ah sido modificado",
       data: updateProduct,
     });
-  }
+  };
 
-  static async delete(req, res) {
+  delete = async (req, res) => {
     const id = req.params.id;
-    const product = await ProductModel.delete({
+    const product = await this.productModel.delete({
       id: id,
     });
     return res.json(product);
-  }
+  };
 }

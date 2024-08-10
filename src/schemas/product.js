@@ -59,6 +59,11 @@ export const productSchema = zod.object({
     invalid_type_error: "goalDate must be a valid date string",
     required_error: "goalDate is required",
   }),
+  status: zod.enum(["low", "medium", "high", "nextToBuy"], {
+    invalid_type_error:
+      "status must be one of 'low', 'medium', 'high', or 'nextToBuy'",
+    required_error: "status is required",
+  }),
 });
 
 export function valideProduct(input) {

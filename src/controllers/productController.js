@@ -20,7 +20,7 @@ export class ProductController {
       const product = await this.productModel.getById({ id });
 
       if (!product) {
-        return res.status(404).send({ error: "Product not found" });
+        return res.status(400).send({ error: "Product not found" });
       }
 
       return res.json(product);
@@ -60,8 +60,12 @@ export class ProductController {
 
     if (!result.success) {
       return res
-        .status(404)
-        .json({ message: "no se encontro la pelicula", error: result.error });
+        .status(400)
+        .json({
+          message:
+            "no se encontro la pelicula <= solo quiero ver cuando se manda",
+          error: result.error,
+        });
     }
 
     const updateProduct = await this.productModel.update({

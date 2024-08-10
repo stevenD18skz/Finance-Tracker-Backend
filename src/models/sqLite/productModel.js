@@ -26,12 +26,13 @@ export class ProductModel {
       `SELECT 
           p.id, 
           p.name, 
-          p.productValue, 
+          p.productValue,
           p.currentMoney, 
           p.createDate, 
           p.goalDate, 
           GROUP_CONCAT(t.name, ', ') AS tags,
-          p.description
+          p.description,
+          p.status
        FROM 
           product p
        LEFT JOIN 
@@ -65,7 +66,8 @@ export class ProductModel {
           p.createDate, 
           p.goalDate, 
           GROUP_CONCAT(t.name, ', ') AS tags,
-          p.description
+          p.description,
+          p.status
         FROM 
           product p
         LEFT JOIN 
@@ -103,6 +105,7 @@ export class ProductModel {
       createDate,
       goalDate,
       description,
+      status,
       tags,
     } = input;
 
@@ -116,7 +119,7 @@ export class ProductModel {
 
       // Insertar producto
       await connection.run(
-        `INSERT INTO product (id, name, productValue, currentMoney, createDate, goalDate,  description) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO product (id, name, productValue, currentMoney, createDate, goalDate,  description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           myUuid,
           name,
@@ -125,6 +128,7 @@ export class ProductModel {
           createDate,
           goalDate,
           description,
+          status,
         ]
       );
 
@@ -156,7 +160,8 @@ export class ProductModel {
           p.createDate, 
           p.goalDate, 
           GROUP_CONCAT(t.name, ', ') AS tags,
-          p.description
+          p.description,
+          p.status
         FROM 
           product p
         LEFT JOIN 
@@ -192,6 +197,7 @@ export class ProductModel {
       createDate,
       goalDate,
       description,
+      status,
       tags,
     } = input;
 
@@ -202,7 +208,7 @@ export class ProductModel {
       // Actualizar el producto
       const result = await connection.run(
         `UPDATE product 
-         SET name = ?, productValue = ?, currentMoney = ?, createDate = ?, goalDate = ?, description = ?
+         SET name = ?, productValue = ?, currentMoney = ?, createDate = ?, goalDate = ?, description = ?, status = ?
          WHERE id = ?`,
         [
           name,
@@ -211,6 +217,7 @@ export class ProductModel {
           createDate,
           goalDate,
           description,
+          status,
           id,
         ]
       );

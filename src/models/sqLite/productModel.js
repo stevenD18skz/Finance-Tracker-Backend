@@ -6,17 +6,32 @@ import e from "cors";
 export class ProductModel {
   static async getAll({ min, max }) {
     const max_price = await connection.all(
-      `SELECT max(amount) as mx
+      `SELECT max(productValue) as mx
        FROM product`
     );
+
+    /*
+    CREATE TABLE product (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT,
+      productValue INTEGER NOT NULL,
+      currentMoney INTEGER NOT NULL,
+      createDate DATE NOT NULL,
+      goalDate DATE NOT NULL
+    );
+    */
 
     const products = await connection.all(
       `SELECT 
           p.id, 
-          p.title, 
-          p.amount, 
+          p.name, 
+          p.productValue, 
+          p.currentMoney, 
+          p.createDate, 
+          p.goalDate, 
           GROUP_CONCAT(t.name, ', ') AS tags,
-          p.note
+          p.description
        FROM 
           product p
        LEFT JOIN 
@@ -24,7 +39,7 @@ export class ProductModel {
        LEFT JOIN 
           tag t ON pt.tag_id = t.id
        WHERE 
-          p.amount >= ? AND p.amount <= ?
+          p.productValue >= ? AND p.productValue <= ?
        GROUP BY 
           p.id`,
       [min || 0, max || max_price[0].mx]
@@ -43,21 +58,24 @@ export class ProductModel {
     try {
       const productAdd = await connection.get(
         `SELECT 
-      p.id, 
-      p.title, 
-      p.amount, 
-      GROUP_CONCAT(t.name, ', ') AS tags,
-      p.note
-    FROM 
-      product p
-    LEFT JOIN 
-      product_tag pt ON p.id = pt.product_id
-    LEFT JOIN 
-      tag t ON pt.tag_id = t.id
-    WHERE 
-      p.id = ?
-    GROUP BY 
-      p.id`,
+          p.id, 
+          p.name, 
+          p.productValue, 
+          p.currentMoney, 
+          p.createDate, 
+          p.goalDate, 
+          GROUP_CONCAT(t.name, ', ') AS tags,
+          p.description
+        FROM 
+          product p
+        LEFT JOIN 
+          product_tag pt ON p.id = pt.product_id
+        LEFT JOIN 
+          tag t ON pt.tag_id = t.id
+        WHERE 
+          p.id = ?
+        GROUP BY 
+          p.id`,
         [id]
       );
 
@@ -78,10 +96,19 @@ export class ProductModel {
   }
 
   static async create({ input }) {
-    const { title, amount, note, tags } = input;
+    const {
+      name,
+      productValue,
+      currentMoney,
+      createDate,
+      goalDate,
+      description,
+      tags,
+    } = input;
 
     // Generar UUID
     const myUuid = uuidv4();
+    console.log(createDate, goalDate);
 
     try {
       // Iniciar transacción
@@ -89,8 +116,16 @@ export class ProductModel {
 
       // Insertar producto
       await connection.run(
-        `INSERT INTO product (id, title, amount, note) VALUES (?, ?, ?, ?)`,
-        [myUuid, title, amount, note]
+        `INSERT INTO product (id, name, productValue, currentMoney, createDate, goalDate,  description) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          myUuid,
+          name,
+          productValue,
+          currentMoney,
+          createDate,
+          goalDate,
+          description,
+        ]
       );
 
       // Insertar tags asociados al producto
@@ -115,10 +150,13 @@ export class ProductModel {
       const productAdd = await connection.get(
         `SELECT 
           p.id, 
-          p.title, 
-          p.amount, 
+          p.name, 
+          p.productValue, 
+          p.currentMoney, 
+          p.createDate, 
+          p.goalDate, 
           GROUP_CONCAT(t.name, ', ') AS tags,
-          p.note
+          p.description
         FROM 
           product p
         LEFT JOIN 
@@ -145,13 +183,17 @@ export class ProductModel {
       throw new Error(error);
     }
   }
-  static async update({ id, input }) {
-    const { title, amount, note, tags } = input;
 
-    // Verificar si los campos obligatorios están presentes
-    if (!title || !amount) {
-      throw new Error("Title and amount are required fields");
-    }
+  static async update({ id, input }) {
+    const {
+      name,
+      productValue,
+      currentMoney,
+      createDate,
+      goalDate,
+      description,
+      tags,
+    } = input;
 
     try {
       // Iniciar transacción
@@ -160,9 +202,17 @@ export class ProductModel {
       // Actualizar el producto
       const result = await connection.run(
         `UPDATE product 
-         SET title = ?, amount = ?, note = ? 
+         SET name = ?, productValue = ?, currentMoney = ?, createDate = ?, goalDate = ?, description = ?
          WHERE id = ?`,
-        [title, amount, note, id]
+        [
+          name,
+          productValue,
+          currentMoney,
+          createDate,
+          goalDate,
+          description,
+          id,
+        ]
       );
 
       // Si el producto no se actualizó, lanzar un error
